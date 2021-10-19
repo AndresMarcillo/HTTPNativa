@@ -2,16 +2,11 @@ package com.oilcreto.httpconnect
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.StrictMode
 import android.util.Log
 import android.widget.Button
 import android.widget.Toast
-import java.io.IOException
-import java.io.InputStream
-import java.net.HttpURLConnection
-import java.net.URL
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), CompletadoListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -29,14 +24,20 @@ class MainActivity : AppCompatActivity() {
 
         btnSolicitudHTTP.setOnClickListener {
             if(Network.hayRed(this)){
-                Log.d("btnSolicitudOnClick",descargarDato("https://www.google.com"))
-                Toast.makeText(this,"Si valio we",Toast.LENGTH_SHORT).show()
+                /*Log.d("btnSolicitudOnClick",descargarDato("https://www.google.com"))*/
+                DescargaURL(this).execute("https://www.google.com")
+                Toast.makeText(this, "Funcionó we", Toast.LENGTH_SHORT).show()
             }else{
                 Toast.makeText(this, "No red :'v efe we", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
+    override fun descargaCompleta(resultado: String) {
+        Log.d("descargaCompleta", resultado)
+    }
+
+    /*
     @Throws(IOException::class)
     private fun descargarDato(url:String):String{
 
@@ -60,4 +61,5 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+    */
 }
