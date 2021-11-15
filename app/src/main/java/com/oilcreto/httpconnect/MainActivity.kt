@@ -5,6 +5,13 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.Toast
+import com.android.volley.Request
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
+import okhttp3.Call
+import okhttp3.OkHttpClient
+import okhttp3.Response
+import java.io.IOException
 
 class MainActivity : AppCompatActivity(), CompletadoListener {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -13,6 +20,8 @@ class MainActivity : AppCompatActivity(), CompletadoListener {
         
         val btnValidarRed = findViewById<Button>(R.id.btnValidarRed)
         val btnSolicitudHTTP = findViewById<Button>(R.id.btnSolicitudHTTP)
+        val btnSolicitudHTTPVolley = findViewById<Button>(R.id.btnSolicitudHTTPVolley)
+        val btnSolicitudHTTPOkHTTP = findViewById<Button>(R.id.btnSolicitudHTTPOkHTTP)
 
         btnValidarRed.setOnClickListener {
             if(Network.hayRed(this)){
@@ -31,35 +40,66 @@ class MainActivity : AppCompatActivity(), CompletadoListener {
                 Toast.makeText(this, "No red :'v efe we", Toast.LENGTH_SHORT).show()
             }
         }
+
+        btnSolicitudHTTPVolley.setOnClickListener{
+            if(Network.hayRed(this)){
+                solicitudHTTPVolley("https://www.google.com")
+            }else{
+                Toast.makeText(this, "No red :'v efe we", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        btnSolicitudHTTPOkHTTP.setOnClickListener{
+            if(Network.hayRed(this)){
+                solicitudHTTPOkHTTP("https://www.google.com")
+            }else{
+                Toast.makeText(this, "No red :'v efe we", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     override fun descargaCompleta(resultado: String) {
         Log.d("descargaCompleta", resultado)
     }
 
-    /*
-    @Throws(IOException::class)
-    private fun descargarDato(url:String):String{
+    //Método para Volley
+    private fun solicitudHTTPVolley(url:String){
+        val queue = Volley.newRequestQueue(this)
 
-        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-        StrictMode.setThreadPolicy(policy)
-        var inputStream:InputStream? = null
+        val solicitud = StringRequest(Request.Method.GET, url, {
+            response ->
+            try {
+                Log.d("solicitudHTTOVolley", response)
+            }catch (e:Exception){
 
-        try {
-            val url = URL(url)
-            val conexion = url.openConnection() as HttpURLConnection
-            conexion.requestMethod = "GET"
-            conexion.connect()
-
-            inputStream = conexion.inputStream
-            return inputStream.bufferedReader().use {
-                it.readText()
             }
-        }finally {
-            if(inputStream != null){
-                inputStream.close()
-            }
-        }
+        }, {  })
+
+        queue.add(solicitud)
     }
-    */
+
+    //Método para OkHTTP
+    private fun solicitudHTTPOkHTTP(url:String){
+        val cliente = OkHttpClient()
+        val solicitud = okhttp3.Request.Builder().url(url).build()
+
+        cliente.newCall(solicitud).enqueue(object: okhttp3.Callback{
+            override fun onFailure(call: Call, e: IOException) {
+                //Implementar error
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val result = response.body()?.string()
+
+                this@MainActivity.runOnUiThread{
+                    try {
+                        Log.d("solicitudHTTPOkHTTP", result.toString())
+                    }catch (e: Exception){
+
+                    }
+                }
+            }
+        })
+    }
+
 }
